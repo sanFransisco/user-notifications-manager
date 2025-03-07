@@ -8,9 +8,9 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       - PORT=8080
-      - REDIS_QUEUE_NAME = notifications-queue
+      - REDIS_QUEUE_NAME=notifications-queue
       - REDIS_URL=redis://redis:6379
-      - BG_NOTIFICATIONS_SENDER_INTERVAL = 1000
+      - BG_NOTIFICATIONS_SENDER_INTERVAL=1000
       - NOTIFICATION_SERVICE_URL=http://notification-service:5001
     volumes:
       - ./:/app
