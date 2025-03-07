@@ -14,7 +14,6 @@ export class NotificationService {
   public isNotificationServiceHealthy(): Boolean {
     this.notificationServiceClient.printBreakerStatus();
     return this.notificationServiceClient.isHealthy();
-    return true;
   }
 
   public async queueNotification(req: Request): Promise<void> {

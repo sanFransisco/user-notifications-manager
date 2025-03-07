@@ -52,7 +52,7 @@ export class NotificationsController {
   };
 
   public sendNotification = async (req: Request, res: Response, next: NextFunction) => {
-    if (!this.notificationService.isNotificationServiceHealthy()) {
+    if (this.notificationService.isNotificationServiceHealthy()) {
       this.notificationService.queueNotification(req);
     }
     res.status(200).send('Notification sent');
