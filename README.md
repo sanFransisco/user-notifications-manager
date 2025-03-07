@@ -1,7 +1,15 @@
 
+
+## User Notifications Manager Service 🍻 
+
+![Project Screenshot](notification-api-call.png)
+
+
+### **Axios + Opossum**
+  The circuit breaker library together with axios is responsive to the notification-service rate-limit depending on the load on this 3rd party service.
+
   ## **Endpoints**
 
-### **User Notifications Manager**
   - POST /notifications
     - Create a new user contact.
     - Example CURL command:
