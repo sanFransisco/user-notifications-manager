@@ -2,37 +2,27 @@ import { Service } from 'typedi';
 import { HttpService } from './http.service';
 import { circuitBuilder } from './opossum-circuit-breaker';
 import { NOTIFICATION_SERVICE_URL } from '@config';
-import { Container } from 'typedi';
-
-// // Define the types of parameters for the async function
-// function asyncFunctionThatCouldFail(x: number, y: number): Promise<number> {
-//   return new Promise((resolve, reject) => {
-//     // Simulate some asynchronous operation
-//     // For example, calling an API or reading from a disk
-//     if (Math.random() > 0.5) {
-//       resolve(x + y); // Success
-//     } else {
-//       reject(new Error('Something went wrong!')); // Failure
-//     }
-//   });
-// }
+import { logger } from '@/logger';
 
 @Service()
-export class NotificationClientService extends HttpService {
+export class NotificationServiceClient extends HttpService implements INotificationServiceClient {
   private breaker = circuitBuilder();
 
-  constructor(baseURL: string) {
-    console.log(baseURL);
-    super(baseURL);
+  constructor() {
+    super(NOTIFICATION_SERVICE_URL);
   }
-  printBreakerStatus = () => console.log('Breaker status:', this.breaker.status);
-  isBreakerClosed = () => this.breaker.status == 'closed';
+
+  isHealthy(): boolean {
+    return !this.breaker.opened;
+  }
+
+  printBreakerStatus = () => console.log('Breaker status:', this.breaker.opened);
 
   public async sendEmail(email: String, message: String): Promise<any> {
     try {
       await this.breaker.fire(async () => await this.sendRequest('POST', '/send-email', { email, message }));
     } catch (ex) {
-      console.log('Error:', ex);
+      logger.error('Error:', ex);
     }
   }
 
@@ -40,9 +30,17 @@ export class NotificationClientService extends HttpService {
     try {
       await this.breaker.fire(async () => await this.sendRequest('POST', '/send-sms', { telephone, message }));
     } catch (ex) {
-      console.log('Error:', ex);
+      logger.error('Error:', ex);
     }
   }
 }
 
-Container.set(NotificationClientService, new NotificationClientService(NOTIFICATION_SERVICE_URL));
+export interface INotificationServiceClient {
+  isHealthy(): boolean;
+  sendEmail(email: String, message: String): Promise<any>;
+  sendSms(telephone: String, message: String): Promise<any>;
+}
+
+// I wanted to register the interface so i use later inversion of controll when injecting the service
+// export const NOTIFICATION_CLIENT_TOKEN = 'NotificationServiceClient';
+// Container.set<NotificationServiceClient>(NOTIFICATION_CLIENT_TOKEN, { value: new NotificationServiceClient() });

@@ -1,13 +1,11 @@
 import { App } from '@/app';
-import { UserRoute } from '@routes/users.route';
 import { ValidateEnv } from '@utils/validateEnv';
 import { NotificationRoute } from './routes/notifications.route';
 import { BackgroundNotificationsSenderService } from './services/bg-notifications-sender.service';
-import { logger } from '@/logger';
+import Container from 'typedi';
 
 ValidateEnv();
-logger.info('🚀 The server is starting...');
-const app = new App([new NotificationRoute(), new UserRoute()]);
-const consumer = new BackgroundNotificationsSenderService('notifications', 500);
+const app = new App([new NotificationRoute()]);
+const consumer = Container.get(BackgroundNotificationsSenderService);
 consumer.connect();
 app.listen();

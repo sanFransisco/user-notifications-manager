@@ -13,7 +13,7 @@ interface CircuitBreakerOptions {
 const options: CircuitBreakerOptions = {
   timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
   errorThresholdPercentage: 50, // When 50% of requests fail, trip the circuit
-  resetTimeout: 1000, // After 1 second, try again
+  resetTimeout: 1000, // After 1 second, reset circuit
   rollingCountTimeout: 25000,
   rollingCountBuckets: 5,
 };

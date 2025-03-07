@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { CreateUserContactDto, UpdateContactPreferenceDto } from '@/dtos/user-contact.dto';
 import { NotificationService } from '@/services/notification.service';
-import { createClient } from 'redis';
 import { logger } from '@/logger';
 
 export class NotificationsController {
@@ -54,12 +53,7 @@ export class NotificationsController {
 
   public sendNotification = async (req: Request, res: Response, next: NextFunction) => {
     if (!this.notificationService.isNotificationServiceHealthy()) {
-      const client = createClient({ url: 'redis://localhost:6379' });
-      const { userId, message } = req.body;
-      logger.debug(req.body);
-      await client.connect();
-      await client.lPush('notifications', JSON.stringify({ userId, message }));
-      logger.info('pushed to redis queue');
+      this.notificationService.queueNotification(req);
     }
     res.status(200).send('Notification sent');
     next();

@@ -1,18 +1,29 @@
-import { Service } from 'typedi';
+import Container, { Inject, Service } from 'typedi';
 import { UserContact } from '@models/user-contact.interface';
-import { Container } from 'typedi';
 import { CreateUserContactDto, UpdateContactPreferenceDto } from '@/dtos/user-contact.dto';
 import { usersContactsDb } from '../db/users-contacts';
-import { NotificationClientService } from '@/services/notification-service-client.service';
+import { NotificationServiceClient } from '@/services/notification-service-client.service';
+import { createClient } from 'redis';
 import { logger } from '@/logger';
+import { REDIS_QUEUE_NAME, REDIS_URL } from '@/config';
+import { Request } from 'express';
 
 @Service()
 export class NotificationService {
-  private notificationServiceClient = Container.get(NotificationClientService);
-
+  private notificationServiceClient: NotificationServiceClient = Container.get(NotificationServiceClient);
   public isNotificationServiceHealthy(): Boolean {
-    //this.notificationServiceClient.printBreakerStatus();
-    return this.notificationServiceClient.isBreakerClosed();
+    this.notificationServiceClient.printBreakerStatus();
+    return this.notificationServiceClient.isHealthy();
+    return true;
+  }
+
+  public async queueNotification(req: Request): Promise<void> {
+    const client = createClient({ url: REDIS_URL });
+    const { userId, message } = req.body;
+    logger.debug(req.body);
+    await client.connect();
+    await client.lPush(REDIS_QUEUE_NAME, JSON.stringify({ userId, message }));
+    logger.debug('Queued notification');
   }
 
   public createUserContact(userContact: CreateUserContactDto): UserContact | null {
@@ -23,12 +34,12 @@ export class NotificationService {
   public editPreference(userId: Number, preference: UpdateContactPreferenceDto): Boolean {
     const userContact = usersContactsDb.getUserContactById(userId);
     if (!userContact) return false;
-    logger.debug('found user contact', userContact);
+    logger.debug('Found user contact', userContact);
     userContact.email = preference.email;
     userContact.telephone = preference.telephone;
     userContact.preferences.email = preference.preferences?.email;
     userContact.preferences.sms = preference.preferences?.sms;
-    logger.debug('edited user contact', userContact);
+    logger.debug('Edited user contact', userContact);
     return true;
   }
 
@@ -39,7 +50,7 @@ export class NotificationService {
   public async sendNotification(userId: Number, message: String): Promise<void> {
     const userContact = this.getUserContactById(userId);
     if (userContact == null) {
-      logger.debug('User not found');
+      logger.debug('Didnt send notification, user not found');
       return;
     }
     if (userContact.preferences.email) {

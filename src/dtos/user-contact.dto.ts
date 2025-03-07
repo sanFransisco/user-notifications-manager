@@ -1,31 +1,46 @@
-import { IsEmail, IsString, IsNumber, IsPhoneNumber, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
+import { IsEmail, IsNumber, IsPhoneNumber, IsBoolean, IsOptional, IsString } from 'class-validator';
+
+export class NotificationMethodDto {
+  @IsOptional()
+  @IsBoolean({ message: 'email flag is a boolean' })
+  email: Boolean | null;
+
+  @IsOptional()
+  @IsBoolean({ message: 'sms flag is a boolean' })
+  sms: Boolean | null;
+}
 
 export class CreateUserContactDto {
-  @IsEmail({ message: 'email must be a valid email' })
+  @IsEmail({ message: 'email must be a valid' })
+  @IsOptional()
   public email: string | null;
 
   @IsNumber()
   public userId: Number;
 
   @IsPhoneNumber('IL')
+  @IsOptional()
   telephone: String | null;
 
-  @IsNotEmpty()
+  @IsOptional()
   preferences: NotificationMethodDto | null;
-}
-
-export class NotificationMethodDto {
-  @IsOptional()
-  @IsBoolean({ message: 'email must be a boolean' })
-  email: Boolean | null;
-
-  @IsOptional()
-  @IsBoolean({ message: 'sms must be a boolean' })
-  sms: Boolean | null;
 }
 
 export class UpdateContactPreferenceDto {
+  @IsString()
   email: String | null;
+
+  @IsPhoneNumber('IL')
   telephone: String | null;
+
+  @IsOptional()
   preferences: NotificationMethodDto | null;
+}
+
+export class SendNotificationDto {
+  @IsNumber()
+  userId: Number | null;
+
+  @IsString()
+  message: String | null;
 }

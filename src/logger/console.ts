@@ -21,16 +21,19 @@ export class Logger {
   };
 
   public error = (message: string, ...optionalParams: any[]): void => {
-    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, ...optionalParams);
+    const timestamp = new Date().toISOString();
+    console.error(`[ERROR] ${timestamp} - ${message}`, ...optionalParams);
   };
 
   public info = (message: string, ...optionalParams: any[]): void => {
-    console.info(`[INFO] ${new Date().toISOString()} - ${message}`, ...optionalParams);
+    const timestamp = new Date().toISOString();
+    console.info(`[INFO] ${timestamp} - ${message}`, ...optionalParams);
   };
 
   public debug = (message: string, ...optionalParams: any[]): void => {
     if (process.env.NODE_ENV.toLowerCase() == 'development') {
-      console.debug(`[DEBUG] ${new Date().toISOString()} - ${message}`, ...optionalParams);
+      const timestamp = new Date().toISOString();
+      console.debug(`[DEBUG] ${timestamp} - ${message}`, ...optionalParams);
     }
   };
 }

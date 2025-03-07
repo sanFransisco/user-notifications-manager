@@ -2,19 +2,21 @@ import { createClient } from 'redis';
 import { REDIS_URL } from '@config';
 import { NotificationService } from './notification.service';
 import { logger } from '@/logger';
+import { Inject, Service } from 'typedi';
+import { BG_NOTIFICATIONS_SENDER_INTERVAL, REDIS_QUEUE_NAME } from '@/config';
 
+@Service()
 export class BackgroundNotificationsSenderService {
-  private notificationService = new NotificationService();
   private client;
   private queueName: string;
   private pollingInterval: number;
-  private pollingTask?: NodeJS.Timeout; // Stores the setInterval reference
+  private pollingTask?: NodeJS.Timeout;
 
-  constructor(queueName: string, pollingInterval = 2000) {
-    this.queueName = queueName;
-    this.pollingInterval = pollingInterval;
+  constructor(@Inject(() => NotificationService) private notificationService: NotificationService) {
+    this.queueName = REDIS_QUEUE_NAME;
+    this.pollingInterval = parseInt(BG_NOTIFICATIONS_SENDER_INTERVAL, 10) || 1000;
     this.client = createClient({
-      url: REDIS_URL, // Adjust if using a different Redis setup
+      url: REDIS_URL,
     });
 
     this.client.on('error', err => console.error('Redis Error:', err));
@@ -55,14 +57,3 @@ export class BackgroundNotificationsSenderService {
     await this.client.quit();
   }
 }
-
-// // Example Usage
-// (async () => {
-//   const consumer = new RedisConsumer('notifications', 2000); // Polls every 2 seconds
-//   await consumer.connect();
-
-//   // Stop after 30 seconds (for demo purposes)
-//   setTimeout(async () => {
-//     await consumer.stop();
-//   }, 30000);
-// })();
