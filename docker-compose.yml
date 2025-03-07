@@ -12,6 +12,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - BG_NOTIFICATIONS_SENDER_INTERVAL=1000
       - NOTIFICATION_SERVICE_URL=http://notification-service:5001
+      - WINDOW_TIMEOUT=20000
+      - WINDOW_COUNT=5
     volumes:
       - ./:/app
       - /app/node_modules

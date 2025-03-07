@@ -28,9 +28,11 @@ export class CreateUserContactDto {
 
 export class UpdateContactPreferenceDto {
   @IsString()
+  @IsOptional()
   email: String | null;
 
   @IsPhoneNumber('IL')
+  @IsOptional()
   telephone: String | null;
 
   @IsOptional()

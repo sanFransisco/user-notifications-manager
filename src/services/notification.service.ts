@@ -33,9 +33,8 @@ export class NotificationService {
   public editPreference(userId: Number, preference: UpdateContactPreferenceDto): Boolean {
     const userContact = usersContactsDb.getUserContactById(userId);
     if (!userContact) return false;
-    logger.debug('Found user contact', userContact);
-    userContact.email = preference.email;
-    userContact.telephone = preference.telephone;
+    if (preference.email != null) userContact.email = preference.email;
+    if (preference.telephone != null) userContact.telephone = preference.telephone;
     userContact.preferences.email = preference.preferences?.email;
     userContact.preferences.sms = preference.preferences?.sms;
     logger.debug('Edited user contact', userContact);
@@ -52,10 +51,10 @@ export class NotificationService {
       logger.debug('Didnt send notification, user not found');
       return;
     }
-    if (userContact.preferences.email) {
+    if (userContact.preferences.email && userContact.email) {
       await this.notificationServiceClient.sendEmail(userContact.email, message);
     }
-    if (userContact.preferences.sms) {
+    if (userContact.preferences.sms && userContact.telephone) {
       await this.notificationServiceClient.sendSms(userContact.telephone, message);
     }
   }

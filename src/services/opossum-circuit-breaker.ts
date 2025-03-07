@@ -1,21 +1,20 @@
 import Opossum from 'opossum';
+import { WINDOW_COUNT, WINDOW_TIMEOUT } from '@config';
 
-// Define the options type for the circuit breaker configuration
 interface CircuitBreakerOptions {
-  timeout: number; // Timeout in milliseconds
-  errorThresholdPercentage: number; // Error threshold percentage to trip the circuit
-  resetTimeout: number; // Timeout before trying again after the circuit is open
-  rollingCountTimeout: number; // Time to wait before resetting the failure count
-  rollingCountBuckets: number; // Number of buckets to divide the rolling window into
+  timeout: number;
+  errorThresholdPercentage: number;
+  resetTimeout: number;
+  rollingCountTimeout: number;
+  rollingCountBuckets: number;
 }
 
-// Define the options object
 const options: CircuitBreakerOptions = {
   timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
   errorThresholdPercentage: 50, // When 50% of requests fail, trip the circuit
   resetTimeout: 1000, // After 1 second, reset circuit
-  rollingCountTimeout: 25000,
-  rollingCountBuckets: 5,
+  rollingCountTimeout: parseInt(WINDOW_TIMEOUT, 10) || 20000,
+  rollingCountBuckets: parseInt(WINDOW_COUNT, 10) || 5,
 };
 const runCallback = async function sendRequest(asyncCallback) {
   return await asyncCallback();
